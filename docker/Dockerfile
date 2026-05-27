@@ -4,7 +4,7 @@ FROM eclipse-temurin:21-jdk-jammy
 # Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar el archivo JAR generado por Maven a la raíz del contenedor
+# Al estar el Dockerfile en la raíz, copiamos directo desde target/
 COPY target/api-orders-*.jar app.jar
 
 # Puerto que expone la aplicación de órdenes

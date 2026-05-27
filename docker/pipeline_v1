@@ -1,9 +1,8 @@
-// 🚀 Jenkinsfile - Pipeline CI/CD para API Orders (Fase 4)
 pipeline {
     agent any
 
     tools {
-        maven 'Maven3' // Ajusta este nombre al que configuraste globalmente en tu Jenkins
+        maven 'Maven3' // Verifica que en Jenkins -> Administrar Jenkins -> Global Tool Configuration tu Maven se llame exactamente 'Maven3'
     }
 
     environment {
@@ -16,8 +15,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo '📥 === ETAPA 1: CHECKOUT ==='
-                echo "Descargando código en el espacio de trabajo: ${env.WORKSPACE}"
-                // Nota: Jenkins maneja el clonado automáticamente si vinculas el pipeline a GitHub
+                echo "Espacio de trabajo activo: ${env.WORKSPACE}"
             }
         }
 
@@ -26,7 +24,6 @@ pipeline {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     echo '🔨 === ETAPA 2: BUILD & TEST ==='
-                    // Ejecuta los tests de Cucumber y genera el archivo de cobertura de JaCoCo
                     sh 'mvn clean test'
                 }
             }
@@ -36,47 +33,44 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo '📊 === ETAPA 3: SONARQUBE ANALYSIS ==='
-                // Reemplaza 'sonarqube' por el nombre de la instancia configurada en tu Jenkins si es diferente
+                // Si no tienes configurado SonarQube en Jenkins, puedes comentar temporalmente estas líneas con // para validar el despliegue
                 withSonarQubeEnv('sonarqube') {
                     sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
                 }
             }
         }
 
-        // 4. Docker Build & Deploy: Construcción de imagen y despliegue del contenedor
+        // 4. Docker Build & Deploy: Construcción de imagen y despliegue
         stage('Docker Build & Deploy') {
             steps {
                 echo '🚀 === ETAPA 4: DOCKER BUILD & DEPLOY ==='
                 script {
-                    echo '1️⃣ Deteniendo y eliminando contenedores previos con el mismo nombre...'
+                    echo '1️⃣ Limpiando contenedores anteriores...'
                     try {
                         sh "docker stop ${CONTAINER_NAME}"
                         sh "docker rm ${CONTAINER_NAME}"
                     } catch (Exception e) {
-                        echo "⚠️ No había ningún contenedor previo en ejecución."
+                        echo "⚠️ No se encontraron contenedores activos previos."
                     }
 
-                    echo '2️⃣ Construyendo la nueva imagen Docker desde la raíz...'
+                    echo '2️⃣ Construyendo imagen Docker desde la raíz del proyecto...'
                     sh "docker build -t ${IMAGE_NAME}:latest ."
 
-                    echo '3️⃣ Desplegando el nuevo contenedor en el puerto 8080...'
+                    echo '3️⃣ Desplegando el contenedor en el puerto 8080...'
                     sh "docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_NAME}:latest"
-
-                    echo '✅ Contenedor desplegado exitosamente.'
+                    
+                    echo '✅ ¡Despliegue finalizado!'
                 }
             }
         }
     }
 
     post {
-        always {
-            echo '🏁 === FIN DEL PIPELINE ==='
-        }
         success {
-            echo '🎉 ✓ ¡Pipeline completado con éxito! Todas las etapas requeridas fueron superadas.'
+            echo '🎉 ¡Pipeline completado con éxito!'
         }
         failure {
-            echo '💥 ✗ El pipeline falló. Revisa los logs en Jenkins.'
+            echo '💥 El pipeline falló en alguna etapa.'
         }
     }
 }

@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: ..  # Sube a la raíz del proyecto para buscar el JAR compilado
-      dockerfile: docker/Dockerfile
+      dockerfile: api-orders/docker/Dockerfile
     container_name: api_orders_app
     ports:
       - '8080:8080'  # Expone el puerto 8080 de tu API

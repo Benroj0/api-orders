@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3' // Verifica que en Jenkins -> Administrar Jenkins -> Global Tool Configuration tu Maven se llame exactamente 'Maven3'
+        maven 'MAVEN_HOME' // <-- Cambiado de 'Maven3' a 'MAVEN_HOME'
     }
 
     environment {

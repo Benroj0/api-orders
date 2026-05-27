@@ -31,19 +31,17 @@ pipeline {
 
         // 3. SonarQube Analysis: Envío de métricas al servidor de Sonar
         stage('SonarQube Analysis') {
-            steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    echo '📊 === ETAPA 3: ANÁLISIS DE CALIDAD ==='
-                    // Cambiado 'SonarQube' a 'sonarqube' (minúsculas) igual que tu proyecto funcional
-                    withSonarQubeEnv('sonarqube') { 
-                        // Comando optimizado y limpio que usa la configuración automática de Maven
-                        sh 'mvn sonar:sonar'
-                    }
-                    echo '✅ === FIN: ANÁLISIS DE CALIDAD COMPLETADO ==='
-                }
+    steps {
+        timeout(time: 10, unit: 'MINUTES') {
+            echo '📊 === ETAPA 3: ANÁLISIS DE CALIDAD ==='
+            withSonarQubeEnv('sonarqube') { 
+                // Añadimos el parámetro -Dsonar.token directamente aquí
+                sh 'mvn sonar:sonar -Dsonar.token=squ_7667b0983b045dc942b15e4dd1c601b0a860a4e6'
             }
+            echo '✅ === FIN: ANÁLISIS DE CALIDAD COMPLETADO ==='
         }
-
+    }
+}
         // 4. Docker Build & Deploy: Construcción de imagen y despliegue
         stage('Docker Build & Deploy') {
             steps {

@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'MAVEN_HOME' // <-- Cambiado de 'Maven3' a 'MAVEN_HOME'
+        maven 'MAVEN_HOME'
     }
 
     environment {
@@ -31,13 +31,18 @@ pipeline {
 
         // 3. SonarQube Analysis: Envío de métricas al servidor de Sonar
         stage('SonarQube Analysis') {
-    steps {
-        // Asegúrate de pasar la URL y el Token de acceso correctos
-        withSonarQubeEnv('SonarQube') { 
-            sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=api-orders'
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    echo '📊 === ETAPA 3: ANÁLISIS DE CALIDAD ==='
+                    // Cambiado 'SonarQube' a 'sonarqube' (minúsculas) igual que tu proyecto funcional
+                    withSonarQubeEnv('sonarqube') { 
+                        // Comando optimizado y limpio que usa la configuración automática de Maven
+                        sh 'mvn sonar:sonar'
+                    }
+                    echo '✅ === FIN: ANÁLISIS DE CALIDAD COMPLETADO ==='
+                }
+            }
         }
-    }
-}
 
         // 4. Docker Build & Deploy: Construcción de imagen y despliegue
         stage('Docker Build & Deploy') {
